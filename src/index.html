@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none';" />
+    <title>职舟</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="custom-titlebar" data-ui-theme="midnight">
+    <header class="window-titlebar" aria-label="应用标题栏">
+      <div class="window-titlebar-brand">
+        <img src="../assets/app-icon.png" alt="" />
+        <strong>职舟</strong>
+        <span>AI 求职工作台</span>
+      </div>
+      <div class="window-titlebar-status"><i></i><span>本地工作区</span></div>
+      <div class="ui-theme-switcher" aria-label="界面氛围">
+        <span>界面氛围</span>
+        <button type="button" data-ui-theme-option="midnight" aria-pressed="true">深空</button>
+        <button type="button" data-ui-theme-option="mist">雾白</button>
+        <button type="button" data-ui-theme-option="forest">墨青</button>
+      </div>
+    </header>
+    <section id="launch-experience" class="launch-experience" aria-label="职舟正在启动" aria-live="polite">
+      <canvas id="launch-particles" aria-hidden="true"></canvas>
+      <div class="launch-aurora" aria-hidden="true"></div>
+      <div class="launch-grid" aria-hidden="true"></div>
+      <div class="launch-brand">
+        <div class="launch-emblem"><img src="../assets/app-icon.png" alt="" /></div>
+        <span class="launch-kicker">AI 求职领航员</span>
+        <h1>职<span>舟</span></h1>
+        <p id="launch-status">正在规划你的上岸航线</p>
+        <div class="launch-progress" aria-hidden="true"><i></i></div>
+      </div>
+      <button id="skip-launch" class="skip-launch" type="button">跳过动画 <span>→</span></button>
+      <span class="launch-footnote">从一份简历，到理想上岸</span>
+    </section>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark"><img src="../assets/app-icon.png" alt="" /></div>
+          <div><strong>职舟</strong><span>AI 求职工作台</span></div>
+        </div>
+
+        <button class="new-chat-button" id="new-chat-button"><span>＋</span> 新的改造任务</button>
+
+        <nav class="nav-list">
+          <button class="nav-item active" data-view="chat"><span>✦</span> 智能改造</button>
+          <button class="nav-item" data-view="studio"><span>▣</span> 简历成品</button>
+          <button class="nav-item" data-view="radar"><span>⌁</span> 求职雷达</button>
+          <button class="nav-item" data-view="resume"><span>▤</span> 原始简历</button>
+          <button class="nav-item" data-view="memory"><span>◇</span> 长期记忆 <em id="memory-count">0</em></button>
+        </nav>
+
+        <div class="history-block">
+          <div class="section-label">最近任务</div>
+          <div id="conversation-list" class="conversation-list"></div>
+        </div>
+
+        <div class="sidebar-footer">
+          <button class="settings-button" id="settings-button"><span>⚙</span><span><strong>模型与联网设置</strong><small id="settings-status">尚未配置</small></span></button>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="crumb"><span>工作台</span><b>/</b><strong id="page-title">智能简历改造</strong></div>
+          <div class="topbar-actions">
+            <button class="context-toggle" id="context-toggle"><span>◎</span> 求职目标</button>
+            <div class="privacy-pill"><i></i> 数据仅保存在本机</div>
+          </div>
+        </header>
+
+        <section id="chat-view" class="view active">
+          <div class="chat-layout">
+            <div class="chat-column">
+              <div id="welcome" class="welcome">
+                <canvas id="ambient-particles" class="ambient-particles" aria-hidden="true"></canvas>
+                <div class="eyebrow">智能职业伙伴</div>
+                <h1>让每一段经历，<br /><span>都精准命中机会。</span></h1>
+                <p>导入你的简历，告诉我目标公司和岗位。我们会一起完成诊断、改写与打磨。</p>
+                <button class="upload-hero" data-import-resume>
+                  <span class="upload-icon">↥</span>
+                  <span><strong>导入一份简历</strong><small>支持 PDF、DOCX、TXT · 文件仅在本机解析</small></span>
+                  <b>选择文件</b>
+                </button>
+                <div class="feature-row">
+                  <span><i>01</i> 聊天式深度改造</span>
+                  <span><i>02</i> 记住你的经历偏好</span>
+                  <span><i>03</i> 联网理解公司岗位</span>
+                </div>
+                <div class="career-artboard" aria-hidden="true">
+                  <div class="career-orbit orbit-a"></div><div class="career-orbit orbit-b"></div>
+                  <div class="career-page">
+                    <div class="career-page-head"><i></i><span><b></b><b></b></span></div>
+                    <strong></strong><small></small>
+                    <div class="career-page-section"><i></i><i></i><i></i></div>
+                    <div class="career-page-section short"><i></i><i></i></div>
+                    <em>匹配度 <b>92</b></em>
+                  </div>
+                  <span class="career-chip chip-one">岗位关键词已对齐</span>
+                  <span class="career-chip chip-two">A4 实时排版</span>
+                  <span class="career-scan"></span>
+                </div>
+              </div>
+
+              <div id="chat-panel" class="chat-panel hidden">
+                <div id="messages" class="messages"></div>
+              </div>
+
+              <div class="composer-wrap">
+                <div class="quick-prompts" id="quick-prompts">
+                  <button>先全面诊断这份简历</button>
+                  <button>按目标岗位重写项目经历</button>
+                  <button>帮我找出缺少的关键词</button>
+                </div>
+                <form id="composer" class="composer">
+                  <textarea id="message-input" rows="1" placeholder="描述你的诉求，例如：我要应聘字节跳动的产品经理……"></textarea>
+                  <div class="composer-actions">
+                    <div>
+                      <button type="button" class="icon-button" title="导入简历" data-import-resume>＋</button>
+                      <label class="web-toggle"><input type="checkbox" id="web-search" /><span>◎</span> 联网参考</label>
+                    </div>
+                    <button type="submit" id="send-button" class="send-button">发送 <span>↑</span></button>
+                  </div>
+                </form>
+                <div class="composer-note">智能模型可能犯错，关键经历与数据请务必核验。</div>
+              </div>
+            </div>
+
+            <div class="context-drawer-backdrop" id="context-backdrop"></div>
+            <aside class="context-panel" id="context-panel">
+              <div class="panel-heading"><div><span>求职目标</span><small>为本次改造建立上下文</small></div><div class="panel-heading-actions"><b id="profile-state">未完善</b><button type="button" class="context-close" id="context-close" title="关闭">×</button></div></div>
+              <form id="profile-form" class="profile-form">
+                <label>目标公司<input id="target-company" placeholder="例如：字节跳动" /></label>
+                <label>目标岗位<input id="target-role" placeholder="例如：高级产品经理" /></label>
+                <label>职位描述 / JD<textarea id="job-description" rows="6" placeholder="粘贴职位描述，智能模型会提取核心要求"></textarea></label>
+                <button class="analyze-inline" id="analyze-jd-context" type="button">✦ 智能识别招聘需求</button>
+                <label>你的侧重点<textarea id="priorities" rows="3" placeholder="例如：突出商业化项目，不夸大数据"></textarea></label>
+                <button class="save-profile" type="submit">保存求职目标</button>
+              </form>
+              <div id="current-resume" class="current-resume"></div>
+              <div class="journey">
+                <div class="section-label">建议流程</div>
+                <div class="journey-step done"><i>1</i><span><strong>导入简历</strong><small>解析现有经历</small></span></div>
+                <div class="journey-step"><i>2</i><span><strong>明确目标</strong><small>公司、岗位和 JD</small></span></div>
+                <div class="journey-step"><i>3</i><span><strong>诊断与改写</strong><small>逐段确认，不编造</small></span></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="radar-view" class="view radar-view">
+          <div class="radar-shell">
+            <header class="radar-hero">
+              <div><span class="eyebrow">公开招聘与面试情报</span><h2>求职雷达</h2><p>搜索可核验的招聘线索与投递入口，再把近年公开面经整理成针对性的准备清单。</p></div>
+              <div class="radar-signal" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+            </header>
+
+            <form id="career-intel-form" class="radar-search-card">
+              <label>目标公司<input id="intel-company" placeholder="例如：字节跳动" /></label>
+              <label>目标岗位<input id="intel-role" placeholder="例如：产品经理" /></label>
+              <label>地区<input id="intel-location" value="中国" placeholder="例如：北京 / 上海 / 远程" /></label>
+              <div class="radar-search-actions">
+                <button id="search-jobs" class="primary-button" type="submit">搜索招聘与投递方式</button>
+                <button id="build-interview-pack" class="secondary-button" type="button">生成面试情报</button>
+              </div>
+            </form>
+
+            <div id="career-intel-status" class="career-intel-status">优先核验公司官网，其次参考公开招聘平台与可信媒体线索。</div>
+
+            <div class="radar-grid">
+              <section class="intel-panel job-radar-panel">
+                <header><div><span>职位雷达</span><h3>招聘信息与投递入口</h3></div><b id="job-result-count">0 条</b></header>
+                <div id="job-search-summary" class="intel-summary"></div>
+                <div id="job-results" class="job-results"><div class="intel-empty">填写公司或岗位后开始搜索。每条结果都会保留来源和核验时间。</div></div>
+              </section>
+
+              <section class="intel-panel interview-panel">
+                <header><div><span>面试情报</span><h3>近年趋势与原创练习题</h3></div><b id="interview-source-count">0 个来源</b></header>
+                <div id="interview-overview" class="intel-summary"></div>
+                <nav id="interview-tabs" class="interview-tabs">
+                  <button type="button" class="active" data-intel-tab="hr">HR 常问题</button>
+                  <button type="button" data-intel-tab="role">岗位专业题</button>
+                  <button type="button" data-intel-tab="written">笔试趋势练习</button>
+                  <button type="button" data-intel-tab="plan">准备计划</button>
+                </nav>
+                <div id="interview-results" class="interview-results"><div class="intel-empty">填写目标公司和岗位后，可生成近三年公开面经趋势与原创预测练习题。</div></div>
+              </section>
+            </div>
+
+            <footer class="radar-disclaimer">招聘状态与面试流程可能随时变化，请在投递前打开来源页面再次确认。练习题是根据公开趋势原创生成，不代表公司真实在用试题。</footer>
+          </div>
+        </section>
+
+        <section id="studio-view" class="view studio-view">
+          <div class="studio-heading">
+            <div><span class="eyebrow">简历成品工作室</span><h2>针对性简历成品</h2><p>识别招聘需求、生成内容、检查视觉效果，再导出 Word 或 PDF。</p></div>
+            <div class="studio-progress"><span class="active">1 识别 JD</span><span>2 生成成品</span><span>3 视觉检查</span><span>4 导出</span></div>
+          </div>
+
+          <div class="studio-grid">
+            <aside class="workflow-column">
+              <section class="work-card">
+                <div class="work-card-title"><span>01</span><div><strong>招聘需求</strong><small>粘贴后自动识别</small></div></div>
+                <textarea id="jd-workbench" class="jd-workbench" placeholder="把完整招聘需求粘贴到这里……"></textarea>
+                <button id="analyze-jd" class="primary-button wide-button" type="button">✦ 智能识别 JD</button>
+                <div id="jd-analysis" class="jd-analysis"></div>
+              </section>
+
+              <section class="work-card">
+                <div class="work-card-title"><span>02</span><div><strong>原简历识别</strong><small>Word / PDF / 扫描件</small></div></div>
+                <p class="work-note">视觉识别会把当前原文件发送到你配置的模型接口。PDF 可检查页面版式；Word 在部分接口中只能读取文字。</p>
+                <button id="resume-vision" class="secondary-button wide-button" type="button">◎ 视觉识别原简历</button>
+                <div id="resume-vision-result" class="review-box"></div>
+              </section>
+            </aside>
+
+            <section class="draft-workspace">
+              <div class="draft-toolbar">
+                <div class="design-controls">
+                  <div class="design-selectors">
+                    <label>版式<select id="resume-template"><option value="professional">专业经典</option><option value="airy">轻盈单页</option><option value="modern">现代强调</option><option value="compact">紧凑高密度</option><option value="ats">ATS 极简单栏</option><option value="timeline">清晰时间轴</option><option value="executive">高管横栏</option><option value="sidebar">创意侧栏</option><option value="swiss">瑞士网格</option><option value="editorial">杂志叙事</option></select></label>
+                    <label>强调色<select id="resume-accent"><option value="indigo">靛蓝</option><option value="navy">深海蓝</option><option value="teal">墨绿</option><option value="burgundy">勃艮第红</option></select></label>
+                    <label>字体<select id="resume-font"><option value="clean">清晰黑体</option><option value="modern">现代无衬线</option><option value="song">宋体书卷</option></select></label>
+                    <label>密度<select id="resume-density"><option value="relaxed">舒展</option><option value="balanced">均衡</option><option value="dense">紧凑</option></select></label>
+                    <label>质感<select id="resume-finish"><option value="soft">自然柔和</option><option value="crisp">利落专业</option><option value="editorial">编辑质感</option></select></label>
+                  </div>
+                  <div class="live-parameters" aria-label="排版参数即时调整">
+                    <label><span>字号 <b id="resume-scale-value">100%</b></span><input id="resume-scale" type="range" min="90" max="112" value="100" /></label>
+                    <label><span>行距 <b id="resume-line-height-value">1.52</b></span><input id="resume-line-height" type="range" min="135" max="175" value="152" /></label>
+                    <label><span>页边距 <b id="resume-page-margin-value">16 mm</b></span><input id="resume-page-margin" type="range" min="10" max="20" value="16" /></label>
+                  </div>
+                  <div class="resume-photo-controls" aria-label="简历照片设置">
+                    <span id="resume-photo-thumb" class="resume-photo-thumb">照片</span>
+                    <button id="choose-resume-photo" class="secondary-button" type="button">添加证件照</button>
+                    <label>外观<select id="resume-photo-shape"><option value="portrait">直角证件照</option><option value="rounded">圆角证件照</option><option value="circle">圆形头像</option></select></label>
+                    <label class="photo-visibility"><input id="resume-photo-visible" type="checkbox" checked /> 在简历中显示</label>
+                    <button id="remove-resume-photo" class="photo-remove hidden" type="button">移除</button>
+                    <small>照片仅保存在本机；导入时会裁成 3:4 并去除原图元数据。国内部分岗位适用，ATS 或海外岗位可暂时关闭显示。</small>
+                  </div>
+                </div>
+                <div class="draft-actions">
+                  <button id="generate-draft" class="primary-button" type="button">✦ 生成针对性简历</button>
+                  <button id="save-draft" class="secondary-button" type="button">保存编辑</button>
+                  <button id="toggle-visual-edit" class="secondary-button" type="button">全屏编辑</button>
+                  <button id="review-draft" class="secondary-button" type="button">◎ 视觉检查</button>
+                </div>
+              </div>
+
+              <section class="template-library" aria-label="简历模板库">
+                <div class="template-library-head">
+                  <div><strong>模板库</strong><b id="template-count" class="template-count">10 套</b><span id="template-recommendation">正在分析适合的版式…</span></div>
+                  <button id="apply-template-recommendation" class="secondary-button" type="button">采用智能推荐</button>
+                </div>
+                <div id="design-presets" class="design-presets" aria-label="一键风格预设">
+                  <button type="button" data-design-preset="recruiter"><i></i><span><strong>招聘官清读</strong><small>专业 · 留白均衡</small></span></button>
+                  <button type="button" data-design-preset="ats"><i></i><span><strong>技术 ATS</strong><small>极简 · 关键词优先</small></span></button>
+                  <button type="button" data-design-preset="brand"><i></i><span><strong>现代品牌</strong><small>醒目 · 更有作品感</small></span></button>
+                  <button type="button" data-design-preset="leader"><i></i><span><strong>管理层叙事</strong><small>克制 · 强调决策力</small></span></button>
+                </div>
+                <div id="template-gallery" class="template-gallery"></div>
+              </section>
+
+              <div class="draft-split">
+                <div class="draft-editor-pane"><div class="pane-label">结构化内容编辑</div><textarea id="draft-editor" placeholder="生成后可在这里继续编辑。使用 # 标题、## 章节、- 要点。"></textarea></div>
+                <div class="preview-pane"><div class="pane-label"><span>A4 实时预览</span><div><strong id="visual-edit-state">只读预览</strong><button id="fullscreen-preview" class="preview-fullscreen-button" type="button">⛶ 全屏成品</button></div></div><div class="resume-preview-frame"><div id="visual-edit-hint" class="visual-edit-hint">正在直接编辑成品 · 点击文字修改，Ctrl+S 保存</div><article id="resume-preview" class="resume-preview template-professional accent-indigo" spellcheck="true"></article></div></div>
+              </div>
+
+              <div id="draft-visual-review" class="draft-review"></div>
+              <footer class="export-bar"><span>PDF 保留完整模板版式；Word 优先保证可编辑性，复杂分栏会转为稳定单栏。</span><div><button id="export-word" class="secondary-button" type="button">导出 Word</button><button id="export-pdf" class="primary-button" type="button">导出 PDF</button></div></footer>
+            </section>
+          </div>
+        </section>
+
+        <section id="resume-view" class="view content-view">
+          <div class="content-head"><div><span class="eyebrow">原始材料</span><h2>原始简历</h2><p>最多保留 5 个本地版本，最新一份会作为当前分析依据。</p></div><button class="primary-button" data-import-resume>＋ 导入简历</button></div>
+          <div id="resume-list" class="resume-list"></div>
+        </section>
+
+        <section id="memory-view" class="view content-view">
+          <div class="content-head"><div><span class="eyebrow">长期记忆</span><h2>长期记忆</h2><p>把真实经历、写作偏好与禁区告诉智能模型；每次对话都会参考。</p></div></div>
+          <form id="memory-form" class="memory-form"><textarea id="memory-input" placeholder="例如：我不希望简历出现未经证实的百分比；我的核心项目是……"></textarea><button class="primary-button" type="submit">保存记忆</button></form>
+          <div id="memory-list" class="memory-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop hidden" id="settings-modal">
+      <section class="modal">
+        <button class="modal-close" id="settings-close">×</button>
+        <div class="modal-title"><span class="eyebrow">自定义智能模型</span><h2>模型与联网设置</h2><p>支持 OpenAI 及兼容接口。密钥使用 Windows 系统能力加密后保存在本机。</p></div>
+        <form id="settings-form" class="settings-form">
+          <div class="form-grid">
+            <label>API 类型<select id="api-mode"><option value="chat">OpenAI 兼容 · Chat Completions</option><option value="responses">OpenAI · Responses</option></select></label>
+            <label>模型名称<input id="model" placeholder="例如：gpt-5.6-terra 或自定义模型名" /></label>
+          </div>
+          <label>视觉模型名称（可选）<input id="vision-model" placeholder="留空则使用上面的主模型" /><small>需要支持图片或文件输入；中转站不支持多模态时会明确报错。</small></label>
+          <label>API 地址<input id="base-url" placeholder="https://api.openai.com/v1" /><small>填写到 /v1 即可；若已包含完整接口路径，也会直接使用。</small></label>
+          <label>API Key<input id="api-key" type="password" placeholder="留空则继续使用已保存的密钥" /><small id="api-key-hint"></small></label>
+          <div class="divider"></div>
+          <label>联网方式<select id="search-mode"><option value="none">关闭（仅使用模型已有知识）</option><option value="tavily">Tavily 搜索 · 适配所有模型接口</option><option value="native">Responses 原生 web_search</option></select></label>
+          <label id="tavily-row">Tavily API Key<input id="tavily-key" type="password" placeholder="留空则继续使用已保存的密钥" /><small id="tavily-key-hint"></small></label>
+          <div class="modal-actions"><button type="button" class="secondary-button danger-link" id="clear-data-button">清空本地数据</button><span></span><button type="button" class="secondary-button" id="test-connection">测试连接</button><button type="submit" class="primary-button">保存设置</button></div>
+        </form>
+      </section>
+    </div>
+
+    <section id="process-experience" class="process-experience hidden" data-mode="import" data-state="running" aria-live="polite">
+      <div class="process-backdrop"></div>
+      <div class="process-card">
+        <div class="process-visual" aria-hidden="true">
+          <div class="process-orbit orbit-one"></div><div class="process-orbit orbit-two"></div>
+          <div class="process-document"><i></i><i></i><i></i><i></i><b>✦</b></div>
+          <span class="process-spark spark-one"></span><span class="process-spark spark-two"></span><span class="process-spark spark-three"></span>
+        </div>
+        <span id="process-kicker" class="process-kicker">原始简历解析</span>
+        <h2 id="process-title">正在导入你的经历</h2>
+        <p id="process-status">等待选择本地文件</p>
+        <div class="process-progress"><i id="process-progress-bar"></i></div>
+        <button id="process-minimize" type="button">转到后台</button>
+      </div>
+    </section>
+
+    <section id="resume-showcase" class="resume-showcase hidden" role="dialog" aria-modal="true" aria-label="全屏简历成品">
+      <canvas id="showcase-particles" aria-hidden="true"></canvas>
+      <header class="showcase-toolbar">
+        <div><span>最终简历成品</span><strong id="showcase-title">简历成品</strong></div>
+        <div><button id="showcase-system-fullscreen" type="button">进入系统全屏</button><button id="showcase-edit" type="button">编辑内容</button><button id="showcase-save" class="hidden" type="button">保存修改</button><button id="showcase-export-pdf" type="button">导出 PDF</button><button id="showcase-close" type="button">退出 <kbd>Esc</kbd></button></div>
+      </header>
+      <nav id="showcase-editor-toolbar" class="showcase-editor-toolbar hidden" aria-label="全屏编辑工具栏">
+        <div class="editor-ribbon-group editor-ribbon-design">
+          <span>页面设计</span>
+          <label>版式<select id="editor-template"><option value="professional">专业经典</option><option value="airy">轻盈单页</option><option value="modern">现代强调</option><option value="compact">紧凑高密度</option><option value="ats">ATS 极简单栏</option><option value="timeline">清晰时间轴</option><option value="executive">高管横栏</option><option value="sidebar">创意侧栏</option><option value="swiss">瑞士网格</option><option value="editorial">杂志叙事</option></select></label>
+          <label>字体<select id="editor-font"><option value="clean">清晰黑体</option><option value="modern">现代无衬线</option><option value="song">宋体书卷</option></select></label>
+          <label>配色<select id="editor-accent"><option value="indigo">靛蓝</option><option value="navy">深海蓝</option><option value="teal">墨绿</option><option value="burgundy">勃艮第红</option></select></label>
+          <label>质感<select id="editor-finish"><option value="soft">自然柔和</option><option value="crisp">利落专业</option><option value="editorial">编辑质感</option></select></label>
+        </div>
+        <div class="editor-ribbon-group">
+          <span>段落</span>
+          <label>样式<select id="editor-block-style"><option value="p">正文</option><option value="h1">姓名标题</option><option value="h2">章节标题</option><option value="h3">经历标题</option></select></label>
+          <label>字号<select id="editor-scale"><option value="90">90%</option><option value="95">95%</option><option value="100">100%</option><option value="105">105%</option><option value="110">110%</option><option value="112">112%</option></select></label>
+          <label>行距<select id="editor-line-height"><option value="140">紧凑</option><option value="152">标准</option><option value="164">舒展</option><option value="175">宽松</option></select></label>
+        </div>
+        <div class="editor-ribbon-group editor-command-group">
+          <span>编辑</span>
+          <button type="button" data-editor-command="undo" title="撤销（Ctrl+Z）">↶ 撤销</button>
+          <button type="button" data-editor-command="redo" title="重做（Ctrl+Y）">↷ 重做</button>
+          <button type="button" data-editor-command="cut" title="剪切（Ctrl+X）">剪切</button>
+          <button type="button" data-editor-command="copy" title="复制（Ctrl+C）">复制</button>
+        </div>
+        <div class="editor-ribbon-group editor-command-group">
+          <span>文字</span>
+          <button type="button" data-editor-command="bold" title="加粗（Ctrl+B）">加粗</button>
+          <button type="button" data-editor-command="italic" title="斜体（Ctrl+I）">斜体</button>
+          <button type="button" data-editor-command="underline" title="下划线（Ctrl+U）">下划线</button>
+          <button type="button" data-editor-command="removeFormat" title="清除文字格式">清除格式</button>
+        </div>
+        <div class="editor-ribbon-group editor-command-group">
+          <span>列表</span>
+          <button type="button" data-editor-command="insertUnorderedList" title="项目符号">• 项目符号</button>
+          <button type="button" data-editor-command="insertOrderedList" title="编号列表">1. 编号</button>
+        </div>
+        <span id="showcase-edit-status" class="showcase-edit-status">所见即所得 · 修改仅保存在本机</span>
+      </nav>
+      <div class="showcase-stage"><article id="showcase-preview" class="resume-preview"></article></div>
+      <footer class="showcase-footer"><span>沉浸式成品预览</span><label>缩放 <input id="showcase-zoom" type="range" min="52" max="100" value="72" /><b id="showcase-zoom-value">72%</b></label></footer>
+    </section>
+
+    <div id="toast" class="toast"></div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+allowBuilds:
+  electron-winstaller: true
+onlyBuiltDependencies:
+  - electron
+  - electron-winstaller
+
+# electron-builder 26.15 依赖声明仍允许旧版 @electron/get，
+# 但其打包代码已使用 v5 的 ElectronDownloadCacheMode。
+overrides:
+  "@electron/get": "5.1.0"

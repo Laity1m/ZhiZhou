@@ -1,0 +1,27 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('resumeApp', {
+  getState: () => ipcRenderer.invoke('state:get'),
+  importResume: () => ipcRenderer.invoke('resume:import'),
+  removeResume: (id) => ipcRenderer.invoke('resume:remove', id),
+  chooseResumePhoto: () => ipcRenderer.invoke('photo:choose'),
+  removeResumePhoto: () => ipcRenderer.invoke('photo:remove'),
+  saveResumePhotoSettings: (settings) => ipcRenderer.invoke('photo:settings', settings),
+  saveProfile: (profile) => ipcRenderer.invoke('profile:save', profile),
+  analyzeJobDescription: (description) => ipcRenderer.invoke('jd:analyze', description),
+  searchJobs: (query) => ipcRenderer.invoke('intelligence:jobs', query),
+  buildInterviewPack: (query) => ipcRenderer.invoke('intelligence:interview', query),
+  analyzeResumeVision: () => ipcRenderer.invoke('resume:vision'),
+  generateDraft: (design) => ipcRenderer.invoke('draft:generate', design),
+  saveDraft: (draft) => ipcRenderer.invoke('draft:save', draft),
+  reviewDraftVision: () => ipcRenderer.invoke('draft:visual-review'),
+  exportDraft: (format) => ipcRenderer.invoke('draft:export', format),
+  saveSettings: (settings) => ipcRenderer.invoke('settings:save', settings),
+  testConnection: (settings) => ipcRenderer.invoke('settings:test', settings),
+  sendMessage: (payload) => ipcRenderer.invoke('chat:send', payload),
+  createConversation: () => ipcRenderer.invoke('conversation:create'),
+  deleteConversation: (id) => ipcRenderer.invoke('conversation:delete', id),
+  addMemory: (content) => ipcRenderer.invoke('memory:add', content),
+  removeMemory: (id) => ipcRenderer.invoke('memory:remove', id),
+  clearLocalData: () => ipcRenderer.invoke('data:clear'),
+});

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>长对话布局回归测试</title>
+    <link rel="stylesheet" href="../../src/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar"></aside>
+      <main class="main-area">
+        <header class="topbar"><strong>长对话布局回归测试</strong></header>
+        <section class="view active">
+          <div class="chat-layout">
+            <div class="chat-column">
+              <div id="chat-panel" class="chat-panel"><div id="messages" class="messages"></div></div>
+              <div class="composer-wrap">
+                <form class="composer">
+                  <textarea rows="1" placeholder="输入框必须始终留在窗口内"></textarea>
+                  <div class="composer-actions"><span>联网参考</span><button type="button" class="send-button">发送</button></div>
+                </form>
+              </div>
+            </div>
+            <aside class="context-panel"></aside>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="./chat-overflow-fixture.js"></script>
+  </body>
+</html>

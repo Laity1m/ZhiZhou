@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>模板库界面验证</title>
+    <link rel="stylesheet" href="../../src/styles.css" />
+    <style>
+      body { overflow: auto; background: #f4f5f9; }
+      .fixture-shell { min-height: 100vh; padding: 22px; }
+      .studio-view { display: block; height: auto; padding: 0; }
+      .studio-grid { grid-template-columns: 280px minmax(0, 1fr); }
+      @media (max-width: 900px) { .studio-grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="fixture-shell">
+      <section class="studio-view">
+        <div class="studio-heading"><div><span class="eyebrow">RESUME STUDIO</span><h2>针对性简历成品</h2><p>模板库和 A4 实时预览测试</p></div></div>
+        <div class="studio-grid">
+          <aside class="workflow-column">
+            <section class="work-card"><div class="work-card-title"><span>01</span><div><strong>岗位匹配</strong><small>本地关键词覆盖</small></div></div><div class="match-card"><div class="match-score"><strong>72</strong><span>岗位匹配分</span></div><div class="match-meter"><i style="width:72%"></i></div><small>缺少：增长实验、SQL</small></div></section>
+          </aside>
+          <section class="draft-workspace">
+            <div class="draft-toolbar"><div><label>版式<select id="resume-template"><option value="professional">专业经典</option><option value="ats">ATS 极简单栏</option><option value="timeline">清晰时间轴</option><option value="executive">高管横栏</option><option value="sidebar">创意侧栏</option></select></label><label>字体<select><option>清晰黑体</option></select></label><label>密度<select><option>均衡</option></select></label></div><div class="draft-actions"><button class="primary-button">生成针对性简历</button></div></div>
+            <section class="template-library">
+              <div class="template-library-head"><div><strong>模板库</strong><span>智能推荐：ATS 极简单栏 · 目标岗位依赖关键词筛选</span></div><button class="secondary-button">采用智能推荐</button></div>
+              <div class="template-gallery">
+                <button type="button" class="template-card" data-template-card="professional"><span class="template-mini mini-professional"><i></i><i></i><i></i><i></i><i></i></span><span class="template-card-copy"><strong>专业经典</strong><small>通用、产品、运营</small></span><em>ATS 高</em></button>
+                <button type="button" class="template-card active" data-template-card="ats"><span class="template-mini mini-ats"><i></i><i></i><i></i><i></i><i></i></span><span class="template-card-copy"><strong>ATS 极简单栏</strong><small>技术、财务、法务</small></span><em>ATS 极高</em></button>
+                <button type="button" class="template-card" data-template-card="timeline"><span class="template-mini mini-timeline"><i></i><i></i><i></i><i></i><i></i></span><span class="template-card-copy"><strong>清晰时间轴</strong><small>项目、运营、研发</small></span><em>ATS 中高</em></button>
+                <button type="button" class="template-card" data-template-card="executive"><span class="template-mini mini-executive"><i></i><i></i><i></i><i></i><i></i></span><span class="template-card-copy"><strong>高管横栏</strong><small>管理、战略、咨询</small></span><em>ATS 中高</em></button>
+                <button type="button" class="template-card" data-template-card="sidebar"><span class="template-mini mini-sidebar"><i></i><i></i><i></i><i></i><i></i></span><span class="template-card-copy"><strong>创意侧栏</strong><small>设计、品牌、市场</small></span><em>ATS 中</em></button>
+              </div>
+            </section>
+            <div class="draft-split">
+              <div class="draft-editor-pane"><div class="pane-label">内容编辑 · Markdown</div><textarea id="draft-editor"># 张三&#10;高级产品经理｜上海｜13800000000&#10;&#10;## 职业概述&#10;8 年互联网产品经验，聚焦增长与商业化。&#10;&#10;## 核心能力&#10;- 产品策略、用户增长、数据分析&#10;- 跨团队项目管理&#10;&#10;## 工作经历&#10;### 示例科技｜高级产品经理｜2022–至今&#10;- 负责商业化产品规划，推动核心流程改版。&#10;- 基于用户研究优化转化路径。&#10;&#10;## 项目经历&#10;### 增长平台升级&#10;- 建立指标体系并推动多团队协作交付。&#10;&#10;## 教育经历&#10;某大学｜本科</textarea></div>
+              <div class="preview-pane"><div class="pane-label">A4 实时预览</div><div class="resume-preview-frame"><article id="resume-preview" class="resume-preview template-ats accent-indigo font-clean density-balanced"><header class="resume-header"><h1>张三</h1><p>高级产品经理｜上海｜13800000000</p></header><div class="resume-body"><section class="resume-section section-summary"><h2>职业概述</h2><p>8 年互联网产品经验，聚焦增长与商业化。</p></section><section class="resume-section section-skills"><h2>核心能力</h2><ul><li>产品策略、用户增长、数据分析</li><li>跨团队项目管理</li></ul></section><section class="resume-section section-experience"><h2>工作经历</h2><div class="resume-item"><h3>示例科技｜高级产品经理｜2022–至今</h3><ul><li>负责商业化产品规划，推动核心流程改版。</li><li>基于用户研究优化转化路径。</li></ul></div></section><section class="resume-section section-projects"><h2>项目经历</h2><div class="resume-item"><h3>增长平台升级</h3><ul><li>建立指标体系并推动多团队协作交付。</li></ul></div></section><section class="resume-section section-education"><h2>教育经历</h2><p>某大学｜本科</p></section></div></article></div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="./studio-template-library.js"></script>
+  </body>
+</html>

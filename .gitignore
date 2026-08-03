@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-store/
+dist/
+release/
+tmp/
+简历/
+resume-reshape-data.json
+runtime-events.log
+.env
+.env.*
+!.env.example
+*.pdf
+*.doc
+*.docx
+*.rtf
+*.log
+.DS_Store

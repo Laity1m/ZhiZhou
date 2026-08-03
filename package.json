@@ -1,0 +1,59 @@
+{
+  "name": "resume-reshape",
+  "version": "0.7.1",
+  "description": "职舟——从一份简历，到理想上岸",
+  "main": "electron/main.cjs",
+  "author": "职舟",
+  "license": "MIT",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "check": "node --check electron/main.cjs && node --check electron/preload.cjs && node --check electron/response-parser.cjs && node --check electron/resume-workflow.cjs && node --check electron/photo-workflow.cjs && node --check electron/template-catalog.cjs && node --check electron/career-intelligence.cjs && node --check src/renderer.js",
+    "test": "node --test tests/*.test.cjs",
+    "pack": "electron-builder --dir",
+    "build:win": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "docx": "latest",
+    "mammoth": "latest",
+    "pdfjs-dist": "latest"
+  },
+  "devDependencies": {
+    "electron": "latest",
+    "electron-builder": "latest",
+    "jszip": "3.10.1"
+  },
+  "build": {
+    "appId": "com.resumereshape.desktop",
+    "productName": "职舟",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "assets/app-icon.png",
+      "THIRD_PARTY_NOTICES.md",
+      "package.json"
+    ],
+    "win": {
+      "icon": "assets/app-icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "职舟"
+    }
+  }
+}
