@@ -16,6 +16,7 @@
   <img alt="Electron" src="https://img.shields.io/badge/Electron-43-6b6ff5" />
   <img alt="License" src="https://img.shields.io/badge/License-MIT-22a06b" />
   <img alt="Language" src="https://img.shields.io/badge/界面-简体中文-e8590c" />
+  <a href="https://github.com/Laity1m/ZhiZhou/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/Laity1m/ZhiZhou?label=最新版" /></a>
 </p>
 
 ## 产品预览
@@ -61,7 +62,7 @@
 
 ## 下载与使用
 
-前往仓库的 **Releases** 页面下载最新的 Windows 安装包。首次启动后，打开左下角“模型与联网设置”。
+[前往 Releases 下载最新版 Windows 安装包](https://github.com/Laity1m/ZhiZhou/releases/latest)。首次启动后，打开左下角“模型与联网设置”。
 
 ### AI 设置
 
