@@ -22,6 +22,12 @@ The local JD keyword coverage and matching-score workflow was informed by [Resum
 
 The light single-page layout and typography controls were informed by [dphang/resume](https://github.com/dphang/resume), [sb2nov/resume](https://github.com/sb2nov/resume), and [RenderCV](https://github.com/rendercv/rendercv), all published under the MIT License. The application does not bundle their LaTeX, Typst, YAML, sample content, fonts, or generated assets; its Chinese HTML/CSS/DOCX implementation is original.
 
+## Document image extraction and local rendering
+
+DOCX embedded-image extraction uses the public image-conversion API from [Mammoth.js](https://github.com/mwilliamson/mammoth.js/), distributed under the BSD 2-Clause License.
+
+PDF embedded-image extraction and display-layer rendering use [Mozilla PDF.js](https://github.com/mozilla/pdf.js), distributed under the Apache License 2.0. Local canvas rendering uses [@napi-rs/canvas](https://github.com/Brooooooklyn/canvas), distributed under the MIT License. No source code or sample document from these projects is copied into the application; the packaged dependencies remain subject to their respective licenses.
+
 ## Visual research references
 
 The visual hierarchy and motion research reviewed the public repositories for [Mineradio](https://github.com/XxHuberrr/Mineradio) (GPL-3.0), [Gentelella](https://github.com/ColorlibHQ/gentelella) (MIT), and [Motion Primitives](https://github.com/ibelick/motion-primitives) (MIT). No source files, names, logos, screenshots, or visual assets from these projects are bundled. The application uses an original HTML/CSS/Canvas implementation based on general principles such as content-first hierarchy, staged entrances, ambient motion, and reduced-motion accessibility.

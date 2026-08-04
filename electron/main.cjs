@@ -6,6 +6,13 @@ const { extractResponseText } = require('./response-parser.cjs');
 const { normalizeInterviewPack, normalizeJobSearch } = require('./career-intelligence.cjs');
 const { prepareResumePhoto } = require('./photo-workflow.cjs');
 const {
+  cropPdfVisionPhoto,
+  extractDocxImageCandidates,
+  extractPdfImageCandidates,
+  normalizeVisionPhotoDetection,
+  selectLikelyResumePhoto,
+} = require('./resume-photo-extractor.cjs');
+const {
   buildResumeHtml,
   cleanResumeMarkdown,
   createDocxBuffer,
@@ -21,7 +28,7 @@ const {
 } = require('./template-catalog.cjs');
 
 const DEFAULT_STORE = {
-  version: 7,
+  version: 8,
   settings: {
     apiMode: 'chat',
     baseUrl: 'https://api.openai.com/v1',
@@ -272,6 +279,7 @@ async function extractResume(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   const buffer = fs.readFileSync(filePath);
   let text = '';
+  let photoCandidates = [];
 
   if (['.txt', '.md', '.rtf'].includes(extension)) {
     text = buffer.toString('utf8');
@@ -279,6 +287,11 @@ async function extractResume(filePath) {
     const mammoth = require('mammoth');
     const result = await mammoth.extractRawText({ buffer });
     text = result.value;
+    try {
+      photoCandidates = await extractDocxImageCandidates(buffer);
+    } catch (error) {
+      recordRuntimeEvent('docx-photo-extraction-failed', { message: error.message });
+    }
   } else if (extension === '.pdf') {
     const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
     const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer), disableWorker: true }).promise;
@@ -289,16 +302,28 @@ async function extractResume(filePath) {
       pages.push(content.items.map((item) => item.str).join(' '));
     }
     text = pages.join('\n\n');
+    try {
+      photoCandidates = await extractPdfImageCandidates(pdf, pdfjs);
+    } catch (error) {
+      recordRuntimeEvent('pdf-photo-extraction-failed', { message: error.message });
+    }
   } else {
     throw new Error('暂不支持该格式，请选择 PDF、DOCX、TXT 或 Markdown 文件。');
   }
 
   const normalized = text.replace(/\u0000/g, '').replace(/[ \t]+\n/g, '\n').trim();
   if (!normalized && extension !== '.pdf') throw new Error('没有从文件中识别到文字。请确认文件不是空白文档。');
+  let detectedPhoto = { photoDataUrl: '', candidateCount: photoCandidates.length, confidence: '未识别' };
+  try {
+    detectedPhoto = selectLikelyResumePhoto(nativeImage, photoCandidates);
+  } catch (error) {
+    recordRuntimeEvent('resume-photo-selection-failed', { message: error.message });
+  }
   return {
     text: normalized,
     needsVision: !normalized && extension === '.pdf',
     mimeType: extension === '.pdf' ? 'application/pdf' : extension === '.docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'text/plain',
+    detectedPhoto,
   };
 }
 
@@ -683,12 +708,14 @@ async function createPdfBuffer(content, design) {
 }
 
 function cleanVisionResult(value) {
+  const source = value && typeof value === 'object' ? value : {};
   return {
-    extractedText: String(value.extractedText || '').trim().slice(0, 50000),
-    layoutSummary: String(value.layoutSummary || '').trim().slice(0, 3000),
-    strengths: (Array.isArray(value.strengths) ? value.strengths : []).map(String).slice(0, 12),
-    issues: (Array.isArray(value.issues) ? value.issues : []).map(String).slice(0, 12),
-    suggestions: (Array.isArray(value.suggestions) ? value.suggestions : []).map(String).slice(0, 12),
+    extractedText: String(source.extractedText || '').trim().slice(0, 50000),
+    layoutSummary: String(source.layoutSummary || '').trim().slice(0, 3000),
+    strengths: (Array.isArray(source.strengths) ? source.strengths : []).map(String).slice(0, 12),
+    issues: (Array.isArray(source.issues) ? source.issues : []).map(String).slice(0, 12),
+    suggestions: (Array.isArray(source.suggestions) ? source.suggestions : []).map(String).slice(0, 12),
+    photoDetection: normalizeVisionPhotoDetection(source.photoDetection),
     analyzedAt: new Date().toISOString(),
   };
 }
@@ -720,12 +747,34 @@ ipcMain.handle('resume:import', async () => {
     mimeType: extracted.mimeType,
     localFile,
     visionReview: null,
+    photoDetection: {
+      detected: Boolean(extracted.detectedPhoto.photoDataUrl),
+      candidateCount: extracted.detectedPhoto.candidateCount || 0,
+      confidence: extracted.detectedPhoto.confidence || '未识别',
+      source: extracted.detectedPhoto.source || '',
+    },
     createdAt: new Date().toISOString(),
   };
+  const photoImported = Boolean(extracted.detectedPhoto.photoDataUrl);
+  if (photoImported) {
+    data.optimizedResume = {
+      ...data.optimizedResume,
+      photoDataUrl: extracted.detectedPhoto.photoDataUrl,
+      photoShape: data.optimizedResume.photoShape || 'rounded',
+      showPhoto: true,
+      updatedAt: new Date().toISOString(),
+    };
+  }
   data.resumes.unshift(resume);
   data.resumes = data.resumes.slice(0, 5);
   writeStore(data);
-  return { canceled: false, needsVision: extracted.needsVision, state: publicState(data) };
+  return {
+    canceled: false,
+    needsVision: extracted.needsVision,
+    photoImported,
+    photoCandidateCount: extracted.detectedPhoto.candidateCount || 0,
+    state: publicState(data),
+  };
 });
 
 ipcMain.handle('resume:remove', (_event, id) => {
@@ -902,8 +951,10 @@ ipcMain.handle('resume:vision', async () => {
   if (!resume.localFile) throw new Error('这份简历来自旧版本，请重新导入一次后再运行视觉识别。');
   const settings = settingsWithDraft(data.settings);
   const prompt = `识别这份简历的全部真实文字，并检查信息层级、留白、密度、字体一致性、对齐、可读性与 ATS 兼容性。
+同时判断页面中是否有求职者本人的证件照或职业头像。不要把公司标志、二维码、图标、装饰图或整页扫描图当成人像。
 返回严格 JSON，不要使用 Markdown：
-{"extractedText":"按原顺序整理的简历全文","layoutSummary":"版式总体评价","strengths":["视觉优点"],"issues":["问题"],"suggestions":["具体改进"]}
+  {"extractedText":"按原顺序整理的简历全文","layoutSummary":"版式总体评价","strengths":["视觉优点"],"issues":["问题"],"suggestions":["具体改进"],"photoDetection":{"detected":true,"page":1,"confidence":"high","box":{"x":0.78,"y":0.05,"width":0.15,"height":0.20}}}
+photoDetection 的 box 使用页面左上角为原点、0 到 1 的归一化坐标，必须紧贴照片外框；没有本人照片时 detected=false，box 各字段为 0。
 不要编造文件中不存在的信息。如果接口对 Word 只能提取文字而无法看到原始版式，请在 layoutSummary 中明确说明。`;
   const result = await callAiWithFile({
     settings,
@@ -916,6 +967,30 @@ ipcMain.handle('resume:vision', async () => {
     resume.text = review.extractedText;
     resume.characters = review.extractedText.length;
     resume.needsVision = false;
+  }
+  if (!data.optimizedResume.photoDataUrl
+    && path.extname(resume.localFile).toLowerCase() === '.pdf'
+    && review.photoDetection.detected) {
+    try {
+      const photoDataUrl = await cropPdfVisionPhoto(nativeImage, resume.localFile, review.photoDetection);
+      if (photoDataUrl) {
+        data.optimizedResume = {
+          ...data.optimizedResume,
+          photoDataUrl,
+          photoShape: data.optimizedResume.photoShape || 'rounded',
+          showPhoto: true,
+          updatedAt: new Date().toISOString(),
+        };
+        resume.photoDetection = {
+          detected: true,
+          candidateCount: resume.photoDetection?.candidateCount || 0,
+          confidence: review.photoDetection.confidence,
+          source: `视觉模型定位 · PDF 第 ${review.photoDetection.page} 页本地裁切`,
+        };
+      }
+    } catch (error) {
+      recordRuntimeEvent('vision-photo-crop-failed', { message: error.message });
+    }
   }
   resume.visionReview = review;
   writeStore(data);

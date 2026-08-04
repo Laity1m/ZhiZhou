@@ -13,6 +13,11 @@ function portraitCrop(size) {
 function prepareResumePhoto(nativeImage, filePath) {
   const source = nativeImage.createFromPath(filePath);
   if (source.isEmpty()) throw new Error('无法读取这张照片，请改用 JPG、PNG、WebP 或 BMP。');
+  return prepareResumePhotoImage(source);
+}
+
+function prepareResumePhotoImage(source) {
+  if (!source || source.isEmpty()) throw new Error('无法读取这张照片，请改用 JPG、PNG、WebP 或 BMP。');
   const size = source.getSize();
   if (!size.width || !size.height) throw new Error('照片尺寸无效，请选择其他图片。');
   const portrait = source
@@ -23,4 +28,4 @@ function prepareResumePhoto(nativeImage, filePath) {
   return `data:image/jpeg;base64,${jpeg.toString('base64')}`;
 }
 
-module.exports = { portraitCrop, prepareResumePhoto };
+module.exports = { portraitCrop, prepareResumePhoto, prepareResumePhotoImage };

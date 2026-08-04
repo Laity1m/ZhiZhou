@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@napi-rs/canvas':
+        specifier: 1.0.3
+        version: 1.0.3
       docx:
         specifier: latest
         version: 9.7.1
@@ -1240,7 +1243,6 @@ snapshots:
       '@napi-rs/canvas-linux-x64-musl': 1.0.3
       '@napi-rs/canvas-win32-arm64-msvc': 1.0.3
       '@napi-rs/canvas-win32-x64-msvc': 1.0.3
-    optional: true
 
   '@noble/hashes@1.4.0': {}
 

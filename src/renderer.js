@@ -817,7 +817,7 @@ function renderStudio() {
 function renderCurrentResume() {
   const holder = $('#current-resume');
   const resume = ui.state.resumes[0];
-  holder.innerHTML = resume ? `<div class="resume-chip"><span>当前简历</span><strong>${escapeHtml(resume.name)}</strong><small>${resume.needsVision ? '扫描版 · 等待视觉识别' : `${resume.characters.toLocaleString()} 字符 · 已在本机解析`}</small></div>` : '';
+  holder.innerHTML = resume ? `<div class="resume-chip"><span>当前简历</span><strong>${escapeHtml(resume.name)}</strong><small>${resume.needsVision ? '扫描版 · 等待视觉识别' : `${resume.characters.toLocaleString()} 字符 · 已在本机解析`}${resume.photoDetection?.detected ? ' · 照片已带入' : ''}</small></div>` : '';
   $$('.journey-step')[0]?.classList.toggle('done', Boolean(resume));
   $$('.journey-step')[1]?.classList.toggle('done', Boolean(ui.state.profile.targetCompany && ui.state.profile.targetRole));
 }
@@ -957,8 +957,18 @@ async function importResume() {
       ui.state = result.state;
       renderAll();
       switchView('chat');
-      process.complete(result.needsVision ? '已导入，扫描页等待视觉识别' : '文档结构与经历已完成解析');
-      showToast(result.needsVision ? '检测到扫描版 PDF，请到“简历成品”运行视觉识别' : '简历已在本机解析完成');
+      const completion = result.photoImported
+        ? '文档经历与简历照片已完成解析'
+        : result.needsVision ? '已导入，扫描页等待视觉识别' : '文档结构与经历已完成解析';
+      process.complete(completion);
+      const message = result.photoImported
+        ? '已在本机识别简历照片，并自动带入新的简历成品'
+        : result.needsVision
+          ? '检测到扫描版 PDF，请到“简历成品”运行视觉识别'
+          : result.photoCandidateCount
+            ? '检测到文档图片，但未把图标或整页扫描图误作证件照'
+            : '简历已在本机解析完成';
+      showToast(message);
     } else process.cancel();
   } catch (error) { process.fail('导入未完成'); showToast(error.message, 'error'); }
 }
@@ -1167,12 +1177,15 @@ async function generateDraft() {
 async function analyzeOriginalResume() {
   if (ui.runningVision) return;
   const button = $('#resume-vision');
+  const hadPhoto = Boolean(ui.state?.optimizedResume?.photoDataUrl);
   ui.runningVision = true;
   setButtonBusy(button, true, '视觉模型识别中…');
   try {
     ui.state = await api.analyzeResumeVision();
     renderAll();
-    showToast('原简历视觉识别与版式检查完成');
+    showToast(!hadPhoto && ui.state.optimizedResume?.photoDataUrl
+      ? '视觉模型已定位原简历照片，并在本机裁切带入成品'
+      : '原简历视觉识别与版式检查完成');
   } catch (error) { showToast(error.message, 'error'); }
   finally { ui.runningVision = false; setButtonBusy(button, false); }
 }

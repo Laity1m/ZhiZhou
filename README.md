@@ -41,7 +41,7 @@
 | --- | --- |
 | 智能改造 | 结合原始简历、目标公司、岗位和长期记忆进行多轮诊断与改写，禁止凭空虚构经历 |
 | JD 识别 | 从粘贴的招聘需求中提取公司、岗位、职责、硬性要求、加分项与 ATS 关键词 |
-| 文件理解 | 本地解析 PDF、DOCX、TXT、Markdown、RTF；可选视觉模型识别扫描件和检查原版式 |
+| 文件理解 | 本地解析 PDF、DOCX、TXT、Markdown、RTF，并自动识别 Word/PDF 内嵌证件照；可选视觉模型识别扫描件、定位扁平化照片和检查原版式 |
 | 简历工作室 | 十套 A4 模板、一键风格预设、照片、字号、行距、页边距、字体与配色即时调整 |
 | 全屏编辑 | 独立的 Word 式编辑界面，支持段落样式、撤销重做、列表、格式调整和自动保存 |
 | 成品导出 | 导出可编辑 DOCX 或所见即所得 PDF |
@@ -59,6 +59,7 @@
 - 全窗口成品展示和自适应小窗口布局。
 - API Key 通过 Electron `safeStorage` 使用 Windows 系统能力加密。
 - 简历、聊天、记忆和设置默认只保存在本机。
+- Word/PDF 中可分离的内嵌照片在本机提取、筛选和裁切，无需调用 AI。
 
 ## 下载与使用
 
@@ -123,7 +124,7 @@ THIRD_PARTY_NOTICES.md      第三方项目与设计研究说明
 - 调用 AI 时，完成请求所需的简历、求职目标、记忆和对话会发送给用户自行配置的 AI 服务。
 - 启用联网时，搜索问题会发送给用户选择的 Tavily 或 Responses 原生搜索服务。
 - 无指定公司且检索远程岗位时，岗位关键词可能发送给 Jobicy 公开 API。
-- 只有用户主动使用视觉识别时，原文件或临时 PDF 才会发送给所配置的视觉模型。
+- 只有用户主动使用视觉识别时，原文件或临时 PDF 才会发送给所配置的视觉模型；扫描版 PDF 的照片位置可由模型判断，但页面渲染与照片裁切仍在本机完成。
 - 提交 Issue 时请勿上传真实简历、API Key、聊天记录或个人联系方式。
 
 更多安全说明见 [SECURITY.md](./SECURITY.md)。
@@ -141,7 +142,7 @@ THIRD_PARTY_NOTICES.md      第三方项目与设计研究说明
 
 ## 开源研究与致谢
 
-模板与工作流研究参考了 [Reactive Resume](https://github.com/AmruthPillai/Reactive-Resume)、[RenderCV](https://github.com/rendercv/rendercv)、[Resume Matcher](https://github.com/srbhr/Resume-Matcher)、[Tech Interview Handbook](https://github.com/yangshun/tech-interview-handbook) 和 [Jobicy Remote Jobs API](https://github.com/Jobicy/remote-jobs-api) 等公开项目。
+模板与工作流研究参考了 [Reactive Resume](https://github.com/AmruthPillai/Reactive-Resume)、[RenderCV](https://github.com/rendercv/rendercv)、[Resume Matcher](https://github.com/srbhr/Resume-Matcher)、[Tech Interview Handbook](https://github.com/yangshun/tech-interview-handbook) 和 [Jobicy Remote Jobs API](https://github.com/Jobicy/remote-jobs-api) 等公开项目。文档图片读取使用 [Mammoth.js](https://github.com/mwilliamson/mammoth.js/) 与 [Mozilla PDF.js](https://github.com/mozilla/pdf.js) 的公开接口。
 
 本项目的桌面界面、中文模板、交互动画和导出实现均为项目内原创代码。完整说明见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
 
