@@ -316,6 +316,29 @@ function buildResumeHtml(content, options = {}) {
   </style></head><body class="template-${design.template} finish-${design.finish}"><main>${resumeHtml}</main></body></html>`;
 }
 
+async function fitPhotoForDocx(dataUrl, fit) {
+  const raw = Buffer.from(String(dataUrl).split(',')[1], 'base64');
+  try {
+    const { createCanvas, loadImage } = require('@napi-rs/canvas');
+    const image = await loadImage(raw);
+    const targetWidth = 450;
+    const targetHeight = 600;
+    const canvas = createCanvas(targetWidth, targetHeight);
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#f2f3f7';
+    context.fillRect(0, 0, targetWidth, targetHeight);
+    const ratio = fit === 'contain'
+      ? Math.min(targetWidth / image.width, targetHeight / image.height)
+      : Math.max(targetWidth / image.width, targetHeight / image.height);
+    const width = image.width * ratio;
+    const height = image.height * ratio;
+    context.drawImage(image, (targetWidth - width) / 2, (targetHeight - height) / 2, width, height);
+    return { buffer: canvas.toBuffer('image/jpeg'), type: 'jpg' };
+  } catch {
+    return { buffer: raw, type: String(dataUrl).startsWith('data:image/png') ? 'png' : 'jpg' };
+  }
+}
+
 async function createDocxBuffer(content, options = {}) {
   const {
     AlignmentType, BorderStyle, Document, HeadingLevel, HorizontalPositionAlign,
@@ -331,8 +354,9 @@ async function createDocxBuffer(content, options = {}) {
   const fontSize = Math.round(((compact ? 19 : 21) * design.fontScale) / 100);
   const pageMargin = Math.round(design.pageMargin * 56.7);
   const softFinish = design.finish === 'soft';
-  const photoBuffer = design.showPhoto ? Buffer.from(design.photoDataUrl.split(',')[1], 'base64') : null;
-  const photoType = design.photoDataUrl.startsWith('data:image/png') ? 'png' : 'jpg';
+  const fittedPhoto = design.showPhoto ? await fitPhotoForDocx(design.photoDataUrl, design.photoFit) : null;
+  const photoBuffer = fittedPhoto?.buffer || null;
+  const photoType = fittedPhoto?.type || 'jpg';
   const textRuns = (value, base = {}) => {
     const source = String(value || '');
     const runs = [];

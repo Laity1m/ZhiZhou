@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { app, BrowserWindow, nativeImage } = require('electron');
-const { prepareResumePhoto } = require('../electron/photo-workflow.cjs');
+const { prepareResumePhotoImage } = require('../electron/photo-workflow.cjs');
 const { createDocxBuffer } = require('../electron/resume-workflow.cjs');
 const {
   cropPdfVisionPhoto,
@@ -16,7 +16,8 @@ app.whenReady().then(async () => {
   let previewWindow;
   let temporaryPdf = '';
   try {
-    const photoDataUrl = prepareResumePhoto(nativeImage, path.join(__dirname, '..', 'assets', 'app-icon.png'));
+    const sourcePhoto = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'app-icon.png')).resize({ width: 300, height: 400 });
+    const photoDataUrl = prepareResumePhotoImage(sourcePhoto);
 
     const docx = await createDocxBuffer('# 示例用户\n\n## 工作经历\n- 自动化测试', {
       template: 'professional',

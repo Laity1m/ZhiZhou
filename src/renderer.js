@@ -403,7 +403,11 @@ function applyEditorDesignChange(editorField, sourceField) {
   preview.style.setProperty('--resume-line-height', design.lineHeight);
   preview.style.setProperty('--resume-page-margin', `${design.pageMargin}mm`);
   preview.style.setProperty('--resume-photo-fit', design.photoFit);
-  preview.style.setProperty('--resume-photo-scale', design.photoScale / 100);
+  const photoRatio = design.photoScale / 100;
+  preview.style.setProperty('--resume-photo-width', `${Math.round(78 * photoRatio)}px`);
+  preview.style.setProperty('--resume-photo-height', `${Math.round(104 * photoRatio)}px`);
+  preview.style.setProperty('--resume-photo-space', `${Math.round(98 * photoRatio)}px`);
+  preview.style.setProperty('--resume-photo-sidebar-space', `${Math.round(108 * photoRatio)}px`);
   ui.showcaseRevision += 1;
   ui.showcaseDirty = true;
   $('#showcase-edit-status').textContent = '有未保存修改';

@@ -130,7 +130,7 @@ function selectLikelyResumePhoto(nativeImage, candidates) {
   }
   evaluated.sort((left, right) => right.score - left.score);
   const best = evaluated[0];
-  if (!best || best.score < 92) return { photoDataUrl: '', candidateCount: evaluated.length, confidence: '未识别' };
+  if (!best || best.score < 110) return { photoDataUrl: '', candidateCount: evaluated.length, confidence: '未识别' };
   return {
     photoDataUrl: prepareResumePhotoImage(best.image),
     candidateCount: evaluated.length,

@@ -35,6 +35,10 @@ app.whenReady().then(async () => {
     capturedDraft = draft;
     return { ...baseState, optimizedResume: { ...baseState.optimizedResume, ...draft } };
   });
+  ipcMain.handle('photo:settings', (_event, settings) => {
+    Object.assign(baseState.optimizedResume, settings);
+    return baseState;
+  });
 
   const window = new BrowserWindow({
     show: Boolean(process.env.RESUME_QA_SHOW),
@@ -56,6 +60,13 @@ app.whenReady().then(async () => {
       document.querySelector('#skip-launch').click();
       await new Promise((resolve) => setTimeout(resolve, 720));
       document.querySelector('[data-view="studio"]').click();
+      const photoFit = document.querySelector('#resume-photo-fit');
+      photoFit.value = 'contain';
+      photoFit.dispatchEvent(new Event('change', { bubbles: true }));
+      const photoScale = document.querySelector('#resume-photo-scale');
+      photoScale.value = '125';
+      photoScale.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       document.querySelector('#toggle-visual-edit').click();
       const preview = document.querySelector('#showcase-preview');
       const editorFont = document.querySelector('#editor-font');
@@ -90,6 +101,8 @@ app.whenReady().then(async () => {
         active: preview.classList.contains('showcase-editing'),
         showcaseVisible: !document.querySelector('#resume-showcase').classList.contains('hidden'),
         photoVisible: Boolean(preview.querySelector('.resume-photo img')),
+        photoFit: getComputedStyle(preview.querySelector('.resume-photo img')).objectFit,
+        photoWidth: preview.querySelector('.resume-photo').getBoundingClientRect().width,
         ribbonTools: document.querySelectorAll('[data-editor-command]').length,
         fontClass: preview.classList.contains('font-song'),
         headerHeight: showcaseHeader.height,
@@ -101,6 +114,8 @@ app.whenReady().then(async () => {
     assert.equal(result.active, true);
     assert.equal(result.showcaseVisible, true);
     assert.equal(result.photoVisible, true);
+    assert.equal(result.photoFit, 'contain');
+    assert.ok(result.photoWidth >= 96 && result.photoWidth <= 100);
     assert.ok(result.ribbonTools >= 10);
     assert.equal(result.fontClass, true);
     assert.ok(result.headerHeight > 44);
