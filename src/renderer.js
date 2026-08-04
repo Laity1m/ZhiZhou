@@ -86,6 +86,8 @@ function designValues() {
     pageMargin: clamp($('#resume-page-margin').value, 10, 20),
     photoDataUrl: storedDraft.photoDataUrl || '',
     photoShape: $('#resume-photo-shape')?.value || storedDraft.photoShape || 'rounded',
+    photoFit: $('#resume-photo-fit')?.value || storedDraft.photoFit || 'cover',
+    photoScale: clamp($('#resume-photo-scale')?.value ?? storedDraft.photoScale ?? 100, 75, 130),
     showPhoto: Boolean(storedDraft.photoDataUrl && $('#resume-photo-visible')?.checked),
   };
 }
@@ -400,6 +402,8 @@ function applyEditorDesignChange(editorField, sourceField) {
   preview.style.setProperty('--resume-font-scale', design.fontScale / 100);
   preview.style.setProperty('--resume-line-height', design.lineHeight);
   preview.style.setProperty('--resume-page-margin', `${design.pageMargin}mm`);
+  preview.style.setProperty('--resume-photo-fit', design.photoFit);
+  preview.style.setProperty('--resume-photo-scale', design.photoScale / 100);
   ui.showcaseRevision += 1;
   ui.showcaseDirty = true;
   $('#showcase-edit-status').textContent = '有未保存修改';
@@ -783,6 +787,7 @@ function renderTemplateLibrary() {
 
 function renderStudio() {
   const draft = ui.state.optimizedResume || {};
+  const sourceResume = ui.state.resumes[0];
   if (document.activeElement !== $('#draft-editor')) $('#draft-editor').value = draft.content || '';
   $('#resume-template').value = draft.template || 'professional';
   $('#resume-accent').value = draft.accent || 'indigo';
@@ -795,12 +800,23 @@ function renderStudio() {
   $('#resume-page-margin').value = draft.pageMargin ?? parameterDefaults.pageMargin;
   const hasPhoto = Boolean(draft.photoDataUrl);
   $('#resume-photo-shape').value = draft.photoShape || 'rounded';
+  $('#resume-photo-fit').value = draft.photoFit || 'cover';
+  $('#resume-photo-scale').value = draft.photoScale ?? 100;
+  $('#resume-photo-scale-value').textContent = `${draft.photoScale ?? 100}%`;
   $('#resume-photo-shape').disabled = !hasPhoto;
+  $('#resume-photo-fit').disabled = !hasPhoto;
+  $('#resume-photo-scale').disabled = !hasPhoto;
   $('#resume-photo-visible').checked = hasPhoto && draft.showPhoto !== false;
   $('#resume-photo-visible').disabled = !hasPhoto;
   $('#choose-resume-photo').textContent = hasPhoto ? '更换照片' : '添加证件照';
   $('#remove-resume-photo').classList.toggle('hidden', !hasPhoto);
   $('#resume-photo-thumb').innerHTML = hasPhoto ? `<img src="${draft.photoDataUrl}" alt="照片缩略图">` : '照片';
+  const sourceHolder = $('#studio-resume-source');
+  sourceHolder.classList.toggle('photo-synced', Boolean(sourceResume?.photoDetection?.detected));
+  sourceHolder.innerHTML = sourceResume
+    ? `<strong>${escapeHtml(sourceResume.name)}</strong><span>${sourceResume.needsVision ? '扫描件已保存，等待视觉识别' : `${sourceResume.characters.toLocaleString()} 字符已解析`}${sourceResume.photoDetection?.detected ? ' · 原照片已同步到成品' : sourceResume.photoDetection?.candidateCount ? ' · 未把图标误作照片' : ' · 暂未识别到照片'}</span>`
+    : '<strong>尚未上传原简历</strong><span>支持 PDF、DOCX、TXT、Markdown 和 RTF</span>';
+  $('#resume-vision').disabled = !sourceResume;
   renderTemplateLibrary();
   renderJobAnalysis();
   renderVisionReview();
@@ -809,9 +825,10 @@ function renderStudio() {
   review.classList.toggle('visible', Boolean(draft.visualReview));
   review.innerHTML = draft.visualReview ? `<strong>视觉模型审查</strong>${markdown(draft.visualReview)}` : '';
   const progress = $$('.studio-progress span');
-  progress[0]?.classList.toggle('active', Boolean(ui.state.profile.jdAnalysis));
-  progress[1]?.classList.toggle('active', Boolean(draft.content));
-  progress[2]?.classList.toggle('active', Boolean(draft.visualReview));
+  progress[0]?.classList.toggle('active', Boolean(sourceResume));
+  progress[1]?.classList.toggle('active', Boolean(ui.state.profile.jdAnalysis));
+  progress[2]?.classList.toggle('active', Boolean(draft.content));
+  progress[3]?.classList.toggle('active', Boolean(draft.visualReview));
 }
 
 function renderCurrentResume() {
@@ -949,14 +966,16 @@ function renderAll() {
   renderMessages();
 }
 
-async function importResume() {
+async function importResume(event) {
+  const returnToStudio = event?.currentTarget?.dataset.importDestination === 'studio'
+    || $('.nav-item.active')?.dataset.view === 'studio';
   const process = beginProcessExperience('import');
   try {
     const result = await api.importResume();
     if (!result.canceled) {
       ui.state = result.state;
       renderAll();
-      switchView('chat');
+      switchView(returnToStudio ? 'studio' : 'chat');
       const completion = result.photoImported
         ? '文档经历与简历照片已完成解析'
         : result.needsVision ? '已导入，扫描页等待视觉识别' : '文档结构与经历已完成解析';
@@ -1001,6 +1020,8 @@ async function saveResumePhotoSettings() {
   try {
     const state = await api.saveResumePhotoSettings({
       photoShape: $('#resume-photo-shape').value,
+      photoFit: $('#resume-photo-fit').value,
+      photoScale: clamp($('#resume-photo-scale').value, 75, 130),
       showPhoto: $('#resume-photo-visible').checked,
     });
     if (revision === ui.photoSettingsRevision) ui.state = state;
@@ -1268,7 +1289,12 @@ $('#resume-density').addEventListener('change', () => {
 [$('#resume-scale'), $('#resume-line-height'), $('#resume-page-margin')].forEach((field) => field.addEventListener('input', updateDraftPreview));
 $('#choose-resume-photo').addEventListener('click', chooseResumePhoto);
 $('#remove-resume-photo').addEventListener('click', removeResumePhoto);
-[$('#resume-photo-shape'), $('#resume-photo-visible')].forEach((field) => field.addEventListener('change', saveResumePhotoSettings));
+[$('#resume-photo-shape'), $('#resume-photo-fit'), $('#resume-photo-visible')].forEach((field) => field.addEventListener('change', saveResumePhotoSettings));
+$('#resume-photo-scale').addEventListener('input', () => {
+  $('#resume-photo-scale-value').textContent = `${$('#resume-photo-scale').value}%`;
+  updateDraftPreview();
+  saveResumePhotoSettings();
+});
 $('#toggle-visual-edit').addEventListener('click', () => openShowcase({ edit: true }));
 $('#resume-preview').addEventListener('input', () => {
   if (!ui.visualEditing) return;

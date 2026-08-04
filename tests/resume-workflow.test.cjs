@@ -20,6 +20,7 @@ const {
 const root = path.join(__dirname, '..');
 const main = fs.readFileSync(path.join(root, 'electron', 'main.cjs'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'src', 'index.html'), 'utf8');
+const renderer = fs.readFileSync(path.join(root, 'src', 'renderer.js'), 'utf8');
 const photoDataUrl = `data:image/png;base64,${fs.readFileSync(path.join(root, 'assets', 'app-icon.png')).toString('base64')}`;
 
 test('extracts structured JD JSON from fenced model output', () => {
@@ -48,10 +49,12 @@ test('renders safe resume markdown with headings and bullets', () => {
 });
 
 test('embeds an optional resume photo in printable HTML', () => {
-  const rendered = buildResumeHtml('# 张三\n联系方式', { photoDataUrl, showPhoto: true, photoShape: 'circle' });
+  const rendered = buildResumeHtml('# 张三\n联系方式', { photoDataUrl, showPhoto: true, photoShape: 'circle', photoFit: 'contain', photoScale: 120 });
   assert.match(rendered, /class="resume-header has-photo"/);
   assert.match(rendered, /class="resume-photo photo-circle"/);
   assert.match(rendered, /data:image\/png;base64/);
+  assert.match(rendered, /object-fit: contain/);
+  assert.match(rendered, /width: 30\.00mm/);
 });
 
 test('builds printable A4 HTML with selected visual template', () => {
@@ -70,6 +73,8 @@ test('applies and bounds live typography parameters to export HTML', () => {
   assert.match(rendered, /@page \{ size: A4; margin: 19mm/);
   assert.match(rendered, /line-height: 1\.68/);
   assert.equal(normalizeDesign({ fontScale: 999, lineHeight: .2, pageMargin: 2 }).fontScale, 112);
+  assert.equal(normalizeDesign({ photoScale: 999 }).photoScale, 130);
+  assert.equal(normalizeDesign({ photoFit: 'invalid' }).photoFit, 'cover');
 });
 
 test('builds adapted ATS, airy, timeline, executive, sidebar, Swiss and editorial templates', () => {
@@ -117,6 +122,8 @@ test('main process exposes JD, vision, generation and export workflows', () => {
 
 test('studio UI offers templates and Word/PDF export', () => {
   assert.match(html, /id="studio-view"/);
+  assert.match(html, /id="studio-resume-source"/);
+  assert.match(html, /data-import-destination="studio"/);
   assert.match(html, /id="resume-template"/);
   assert.match(html, /id="template-gallery"/);
   assert.match(html, /value="ats"/);
@@ -128,9 +135,13 @@ test('studio UI offers templates and Word/PDF export', () => {
   assert.match(html, /id="resume-page-margin"/);
   assert.match(html, /id="choose-resume-photo"/);
   assert.match(html, /id="resume-photo-shape"/);
+  assert.match(html, /id="resume-photo-fit"/);
+  assert.match(html, /id="resume-photo-scale"/);
   assert.match(html, /id="resume-photo-visible"/);
   assert.match(html, /id="fullscreen-preview"/);
   assert.match(html, /id="resume-showcase"/);
   assert.match(html, /id="export-word"/);
   assert.match(html, /id="export-pdf"/);
+  assert.match(renderer, /returnToStudio \? 'studio' : 'chat'/);
+  assert.match(renderer, /原照片已同步到成品/);
 });

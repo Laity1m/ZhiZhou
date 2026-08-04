@@ -180,6 +180,8 @@ function normalizeDesign(options = {}) {
     pageMargin: inRange(options.pageMargin, 10, 20, metrics.pageMargin),
     photoDataUrl,
     photoShape: ['portrait', 'rounded', 'circle'].includes(options.photoShape) ? options.photoShape : 'rounded',
+    photoFit: ['cover', 'contain'].includes(options.photoFit) ? options.photoFit : 'cover',
+    photoScale: inRange(options.photoScale, 75, 130, 100),
     showPhoto: Boolean(options.showPhoto && photoDataUrl),
     metrics,
   };
@@ -191,6 +193,9 @@ function buildResumeHtml(content, options = {}) {
   const modern = design.template === 'modern';
   const metrics = design.metrics;
   const scale = design.fontScale / 100;
+  const photoScale = design.photoScale / 100;
+  const photoWidth = 25 * photoScale;
+  const photoHeight = 32 * photoScale;
   const fontSize = (compact ? 9.5 : metrics.fontSize) * scale;
   const photoHtml = design.showPhoto
     ? `<figure class="resume-photo photo-${design.photoShape}"><img src="${design.photoDataUrl}" alt="简历照片"></figure>`
@@ -207,10 +212,10 @@ function buildResumeHtml(content, options = {}) {
     body { margin: 0; background: white; color: #202331; font-family: ${design.fontStack}; font-size: ${fontSize.toFixed(2)}pt; line-height: ${design.lineHeight}; }
     main { width: 100%; }
     .resume-header { margin-bottom: ${metrics.sectionGap}px; }
-    .resume-header.has-photo { position: relative; min-height: 32mm; padding-right: 31mm; }
-    .resume-photo { position: absolute; top: 0; right: 0; width: 25mm; height: 32mm; margin: 0; overflow: hidden; border: 1px solid #d8dbe4; border-radius: 1.5mm; background: #f2f3f7; }
-    .resume-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-    .resume-photo.photo-rounded { border-radius: 3mm; }.resume-photo.photo-circle { width: 25mm; height: 25mm; border-radius: 50%; }
+    .resume-header.has-photo { position: relative; min-height: ${photoHeight.toFixed(2)}mm; padding-right: ${(photoWidth + 6).toFixed(2)}mm; }
+    .resume-photo { position: absolute; top: 0; right: 0; width: ${photoWidth.toFixed(2)}mm; height: ${photoHeight.toFixed(2)}mm; margin: 0; overflow: hidden; border: 1px solid #d8dbe4; border-radius: 1.5mm; background: #f2f3f7; }
+    .resume-photo img { display: block; width: 100%; height: 100%; object-fit: ${design.photoFit}; }
+    .resume-photo.photo-rounded { border-radius: 3mm; }.resume-photo.photo-circle { width: ${photoWidth.toFixed(2)}mm; height: ${photoWidth.toFixed(2)}mm; border-radius: 50%; }
     .resume-body { display: block; }
     .resume-section { break-inside: auto; }
     .resume-item { break-inside: avoid; }
@@ -230,7 +235,7 @@ function buildResumeHtml(content, options = {}) {
     ` : ''}
     ${design.template === 'timeline' ? `
       .resume-header { text-align: center; }
-      .resume-header.has-photo { padding-left: 31mm; }
+      .resume-header.has-photo { padding-left: ${(photoWidth + 6).toFixed(2)}mm; }
       .resume-header h1 { color: #171a28; }
       .resume-header p { display: inline; margin: 0 6px; }
       h2 { border: 0; padding: 0; }
@@ -239,7 +244,7 @@ function buildResumeHtml(content, options = {}) {
     ` : ''}
     ${design.template === 'executive' ? `
       .resume-header { text-align: center; }
-      .resume-header.has-photo { padding-left: 31mm; }
+      .resume-header.has-photo { padding-left: ${(photoWidth + 6).toFixed(2)}mm; }
       .resume-header p { display: inline; margin: 0 7px; }
       .resume-section { display: grid; grid-template-columns: 30mm minmax(0, 1fr); column-gap: 7mm; border-top: 1px solid #777; padding-top: 7px; margin-top: 12px; }
       .resume-section h2 { grid-column: 1; margin: 0; padding: 0; border: 0; font-size: ${(11.5 * scale).toFixed(2)}pt; color: ${design.color}; }
@@ -248,7 +253,7 @@ function buildResumeHtml(content, options = {}) {
     ` : ''}
     ${design.template === 'sidebar' ? `
       .resume-header { color: white; background: ${design.color}; border-radius: 9px; padding: 13px 16px; }
-      .resume-header.has-photo { padding-right: 32mm; }
+      .resume-header.has-photo { padding-right: ${(photoWidth + 7).toFixed(2)}mm; }
       .resume-header h1, .resume-header strong { color: white; }
       .resume-header p { display: inline; margin-right: 10px; }
       .resume-body { display: grid; grid-template-columns: minmax(0, 30%) minmax(0, 1fr); gap: 0 8mm; align-items: start; }
@@ -264,14 +269,14 @@ function buildResumeHtml(content, options = {}) {
     ` : ''}
     ${design.template === 'swiss' ? `
       .resume-header { padding-left: 5mm; border-left: 2.2mm solid ${design.color}; }
-      .resume-header.has-photo { padding-right: 31mm; }
+      .resume-header.has-photo { padding-right: ${(photoWidth + 6).toFixed(2)}mm; }
       h1 { color: #171a28; font-family: "Microsoft YaHei", "Segoe UI", sans-serif; font-weight: 750; letter-spacing: -.025em; }
       h2 { display: flex; align-items: center; gap: 3mm; padding: 0; border: 0; font-size: ${(11.5 * scale).toFixed(2)}pt; letter-spacing: .12em; text-transform: uppercase; }
       h2::after { content: ""; height: 1px; flex: 1; background: ${design.color}; opacity: .52; }
     ` : ''}
     ${design.template === 'editorial' ? `
       .resume-header { padding: 4mm 0; text-align: center; border-top: 1px solid #202331; border-bottom: 1px solid #202331; }
-      .resume-header.has-photo { padding-left: 31mm; padding-right: 31mm; }
+      .resume-header.has-photo { padding-left: ${(photoWidth + 6).toFixed(2)}mm; padding-right: ${(photoWidth + 6).toFixed(2)}mm; }
       .resume-header p { display: inline; margin: 0 6px; }
       h1 { color: #171a28; font-family: Georgia, "Songti SC", serif; font-size: ${(30 * scale).toFixed(2)}pt; font-weight: 500; letter-spacing: .02em; }
       h2 { margin-top: ${compact ? '13px' : '20px'}; padding: 0 0 5px; border: 0; text-align: center; letter-spacing: .14em; }
@@ -357,7 +362,7 @@ async function createDocxBuffer(content, options = {}) {
         children.push(new ImageRun({
           type: photoType,
           data: photoBuffer,
-          transformation: { width: 75, height: 100 },
+          transformation: { width: Math.round(75 * design.photoScale / 100), height: Math.round(100 * design.photoScale / 100) },
           altText: { title: '简历照片', description: '用户选择的简历照片', name: 'resume-photo' },
           floating: {
             horizontalPosition: { relative: HorizontalPositionRelativeFrom.MARGIN, align: HorizontalPositionAlign.RIGHT },

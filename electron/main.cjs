@@ -64,6 +64,8 @@ const DEFAULT_STORE = {
     pageMargin: 16,
     photoDataUrl: '',
     photoShape: 'rounded',
+    photoFit: 'cover',
+    photoScale: 100,
     showPhoto: true,
     visualReview: '',
     updatedAt: '',
@@ -800,6 +802,8 @@ ipcMain.handle('photo:choose', async () => {
     ...data.optimizedResume,
     photoDataUrl: prepareResumePhoto(nativeImage, selection.filePaths[0]),
     photoShape: data.optimizedResume.photoShape || 'rounded',
+    photoFit: data.optimizedResume.photoFit || 'cover',
+    photoScale: data.optimizedResume.photoScale || 100,
     showPhoto: true,
     updatedAt: new Date().toISOString(),
   };
@@ -824,6 +828,8 @@ ipcMain.handle('photo:settings', (_event, settings) => {
   data.optimizedResume = {
     ...data.optimizedResume,
     photoShape: ['portrait', 'rounded', 'circle'].includes(settings?.photoShape) ? settings.photoShape : 'rounded',
+    photoFit: ['cover', 'contain'].includes(settings?.photoFit) ? settings.photoFit : 'cover',
+    photoScale: Math.min(130, Math.max(75, Number(settings?.photoScale) || 100)),
     showPhoto: Boolean(data.optimizedResume.photoDataUrl && settings?.showPhoto),
     updatedAt: new Date().toISOString(),
   };
@@ -1014,6 +1020,8 @@ ipcMain.handle('draft:generate', async (_event, requestedDesign) => {
     pageMargin: design.pageMargin,
     photoDataUrl: design.photoDataUrl,
     photoShape: design.photoShape,
+    photoFit: design.photoFit,
+    photoScale: design.photoScale,
     showPhoto: design.showPhoto,
   };
   const settings = settingsWithDraft(data.settings);
@@ -1050,6 +1058,8 @@ ipcMain.handle('draft:save', (_event, payload) => {
     pageMargin: design.pageMargin,
     photoDataUrl: design.photoDataUrl,
     photoShape: design.photoShape,
+    photoFit: design.photoFit,
+    photoScale: design.photoScale,
     showPhoto: design.showPhoto,
     updatedAt: new Date().toISOString(),
   };
